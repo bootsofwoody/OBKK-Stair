@@ -1,0 +1,67 @@
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+@implements IAsyncDisposable
+
+<section class="panel viewport" aria-labelledby="model-heading">
+    <div class="panel-header">
+        <h2 id="model-heading">Site model</h2>
+        <button class="view-button" type="button" @onclick="ResetView" disabled="@(!ready)">Reset view</button>
+    </div>
+    <div class="view-body">
+        <div class="canvas-host" @ref="canvasHost" role="img" aria-label="Interactive 3D site model"></div>
+        @if (status is not null)
+        {
+            <p class="view-status" role="status">@status</p>
+        }
+    </div>
+    <div class="view-footer">
+        <span>base.glb</span>
+        <span>Drag to orbit · Scroll to zoom · Right-drag to pan</span>
+    </div>
+</section>
+
+@code {
+    private ElementReference canvasHost;
+    private IJSObjectReference? module;
+    private bool ready;
+    private string? status = "Loading site model…";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        try
+        {
+            module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/site-viewer.js");
+            status = await module.InvokeAsync<string?>(
+                "mount", canvasHost, Navigation.ToAbsoluteUri("models/base.glb").AbsoluteUri);
+            ready = status is null;
+        }
+        catch (JSException)
+        {
+            status = "The 3D viewer could not start. Check your browser and connection.";
+        }
+
+        StateHasChanged();
+    }
+
+    private async Task ResetView()
+    {
+        if (module is not null)
+        {
+            await module.InvokeVoidAsync("reset", canvasHost);
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (module is not null)
+        {
+            await module.InvokeVoidAsync("unmount", canvasHost);
+            await module.DisposeAsync();
+        }
+    }
+}

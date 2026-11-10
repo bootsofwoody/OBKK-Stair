@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/OBKK.Stair.Core/OBKK.Stair.Core.csproj" />
+  <Project Path="src/OBKK.Stair.Web/OBKK.Stair.Web.csproj" />
+</Solution>

@@ -1,0 +1,41 @@
+<div class="range-field">
+    <div class="field-heading">
+        <label for="@Id">@Label</label>
+        <div class="field-value">
+            <input type="number" min="@Format(Min)" max="@Format(Max)" step="@Format(Step)"
+                   aria-label="@($"{Label} in {Unit}")" @bind:get="Format(Value)" @bind:set="SetValue" />
+            <span aria-hidden="true">@Unit</span>
+        </div>
+    </div>
+    <input type="range" id="@Id" min="@Format(Min)" max="@Format(Max)" step="@Format(Step)"
+           aria-valuetext="@($"{Format(Value)} {Unit}")" style="@TrackStyle"
+           @bind:get="Format(Value)" @bind:set="SetValue" @bind:event="oninput" />
+</div>
+
+@code {
+    [Parameter, EditorRequired] public string Id { get; set; } = "";
+    [Parameter, EditorRequired] public string Label { get; set; } = "";
+    [Parameter, EditorRequired] public string Unit { get; set; } = "";
+    [Parameter] public double Min { get; set; }
+    [Parameter] public double Max { get; set; }
+    [Parameter] public double Step { get; set; }
+    [Parameter] public int Decimals { get; set; }
+    [Parameter] public double Value { get; set; }
+    [Parameter] public EventCallback<double> ValueChanged { get; set; }
+
+    private string TrackStyle =>
+        FormattableString.Invariant($"--fill: {100 * (Value - Min) / (Max - Min):0.##}%");
+
+    private string Format(double value) => value.ToString($"F{Decimals}", CultureInfo.InvariantCulture);
+
+    private Task SetValue(string value)
+    {
+        if (!double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var number)
+            || !double.IsFinite(number))
+        {
+            return Task.CompletedTask;
+        }
+
+        return ValueChanged.InvokeAsync(Math.Round(Math.Clamp(number, Min, Max), Decimals));
+    }
+}

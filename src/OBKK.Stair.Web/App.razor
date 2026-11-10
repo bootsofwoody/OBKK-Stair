@@ -1,0 +1,72 @@
+<header class="site-header">
+    <div class="brand">
+        <svg viewBox="0 0 32 32" width="32" height="32" aria-hidden="true">
+            <path d="M4 25h7v-6h6v-6h6V7h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+        </svg>
+        <span>OBKK<span class="brand-divider">/</span>STAIR</span>
+    </div>
+    <span class="header-caption">GEOMETRY STUDY</span>
+</header>
+
+<main>
+    <h1>Curved stair study</h1>
+    <div class="workspace">
+        <SiteViewport />
+
+        <aside class="sidebar" aria-label="Stair design">
+            <section class="panel parameters" aria-labelledby="parameters-heading">
+                <div class="panel-header">
+                    <h2 id="parameters-heading">Design parameters</h2>
+                </div>
+                <div class="fields">
+                    <RangeField Id="tread-depth" Label="Tread depth" Unit="mm" Min="0" Max="2000"
+                                Step="1" @bind-Value="treadDepthMm" />
+                    <RangeField Id="riser-height" Label="Riser height" Unit="mm" Min="0" Max="180"
+                                Step="1" @bind-Value="targetRiserHeightMm" />
+                    <RangeField Id="total-height" Label="Total height" Unit="m" Min="9" Max="12"
+                                Step="0.01" Decimals="2" @bind-Value="totalHeightM" />
+                    <RangeField Id="radius" Label="Radius" Unit="m" Min="7.5" Max="20"
+                                Step="0.01" Decimals="2" @bind-Value="radiusM" />
+                    <RangeField Id="width" Label="Width" Unit="m" Min="1.5" Max="4"
+                                Step="0.01" Decimals="2" @bind-Value="widthM" />
+                    <RangeField Id="landing-length" Label="Landing length" Unit="m" Min="1.5" Max="4"
+                                Step="0.01" Decimals="2" @bind-Value="landingLengthM" />
+                </div>
+            </section>
+
+            <section class="panel" aria-labelledby="results-heading">
+                <div class="panel-header">
+                    <h2 id="results-heading">Stair summary</h2>
+                    <span class="panel-caption">ESTIMATE</span>
+                </div>
+                @{ var result = StairStudy.Calculate(treadDepthMm, targetRiserHeightMm, totalHeightM, landingLengthM); }
+                <dl class="results">
+                    <div><dt>Step count</dt><dd>@(result?.RiserCount.ToString("N0") ?? "—")</dd></div>
+                    <div><dt>Landing count</dt><dd>@(result?.LandingCount.ToString("N0") ?? "—")</dd></div>
+                    <div><dt>Travel distance</dt><dd>@(result is null ? "—" : $"{result.TravelDistanceM:N2} m")</dd></div>
+                    <div><dt>Stair ratio</dt><dd>@(result is null ? "—" : $"1 : {result.RunPerUnitRise:N2}")</dd></div>
+                </dl>
+                <p class="summary-note">
+                    @if (result is null)
+                    {
+                        <span>Enter a tread depth and riser height above zero to calculate a stair.</span>
+                    }
+                    else
+                    {
+                        <span>Actual riser @result.ActualRiserHeightMm.ToString("N1") mm.
+                            Study assumption of up to @StairStudy.RisersPerFlight risers per flight.</span>
+                    }
+                </p>
+            </section>
+        </aside>
+    </div>
+</main>
+
+@code {
+    private double treadDepthMm = 300;
+    private double targetRiserHeightMm = 160;
+    private double totalHeightM = 10;
+    private double radiusM = 12.5;
+    private double widthM = 2.5;
+    private double landingLengthM = 2;
+}
