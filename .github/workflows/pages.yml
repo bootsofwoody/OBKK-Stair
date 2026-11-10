@@ -1,0 +1,69 @@
+name: Deploy website to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Configure Pages
+        id: pages
+        uses: actions/configure-pages@v5
+
+      - name: Publish Blazor website
+        run: dotnet publish src/OBKK.Stair.Web -c Release -o "${{ runner.temp }}/stair-publish"
+
+      - name: Set website base path
+        env:
+          PAGES_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          PUBLISH_DIRECTORY: ${{ runner.temp }}/stair-publish/wwwroot
+        run: |
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+
+          directory = Path(os.environ["PUBLISH_DIRECTORY"])
+          index = directory / "index.html"
+          base_path = os.environ["PAGES_BASE_PATH"].rstrip("/") + "/"
+          html = index.read_text(encoding="utf-8")
+          assert '<base href="/" />' in html, "Expected base element was not found"
+          index.write_text(html.replace('<base href="/" />', f'<base href="{base_path}" />'), encoding="utf-8")
+          assert (directory / "models" / "base.glb").is_file(), "Site model is missing"
+          PY
+
+      - name: Upload website
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: ${{ runner.temp }}/stair-publish/wwwroot
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy website
+        id: deployment
+        uses: actions/deploy-pages@v4

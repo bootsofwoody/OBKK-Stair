@@ -1,6 +1,3 @@
 .vs/
 bin/
 obj/
-
-# Project model copied from the shared drive for local preview.
-/src/OBKK.Stair.Web/wwwroot/models/base.glb

@@ -5,8 +5,8 @@ controls and C# calculations. Three.js displays the site model.
 
 ## Run locally
 
-Use the .NET 10 SDK and put your site model at
-`src/OBKK.Stair.Web/wwwroot/models/base.glb`. This local asset is ignored by Git.
+Use the .NET 10 SDK. The site model is included at
+`src/OBKK.Stair.Web/wwwroot/models/base.glb`.
 
 ```sh
 dotnet run --project src/OBKK.Stair.Web
@@ -19,7 +19,11 @@ reference model. Stair mesh generation and Thai code checks are future work.
 
 ## GitHub Pages
 
-Publish the standalone app with `dotnet publish src/OBKK.Stair.Web -c Release`
-and use the published `wwwroot` as the Pages artifact. Set the base URL in the
-published `index.html` to `/OBKK-Stair/` for a project site. Add only model assets
-approved for publication to the deployment.
+In the repository's **Settings → Pages → Build and deployment**, select
+**GitHub Actions** as the source. The `Deploy website to GitHub Pages` workflow
+publishes the app and its model when changes are pushed to `main`. You can also
+run it manually from the **Actions** tab.
+
+The workflow builds the app into static files, sets the base path for the Pages
+URL, and deploys the published `wwwroot` directory. The entry page is
+`index.html`. Browsers load the published app and model from that directory.
