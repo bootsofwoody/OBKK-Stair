@@ -6,7 +6,7 @@ controls and C# calculations. Three.js displays the site model.
 ## Run locally
 
 Use the .NET 10 SDK. The site model is included at
-`src/OBKK.Stair.Web/wwwroot/models/base.glb`.
+`src/OBKK.Stair.Web/wwwroot/models/base2.glb`.
 
 ```sh
 dotnet run --project src/OBKK.Stair.Web

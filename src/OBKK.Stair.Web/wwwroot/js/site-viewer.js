@@ -60,7 +60,7 @@ export async function mount(host, modelUrl) {
     } catch (error) {
         console.error('Unable to load the site model.', error);
         unmount(host);
-        return 'Site model unavailable. Place base.glb in wwwroot/models and reload.';
+        return 'Site model unavailable. Place base2.glb in wwwroot/models and reload.';
     }
 }
 
